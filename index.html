@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic Component Example</title>
+    <!-- Load html-include.js early in <head> to prevent FOUC/flashing -->
+    <script src="html-include.js"></script>
+</head>
+<body>
+
+<!--
+  HTML INCLUDE HEADER SLOT
+  - src: path to the partial
+  - min-height: reserves vertical space to prevent layout shift (CLS)
+  - allow-scripts: allows the script inside header.html to run
+  - fade: smooth fade-in transition on load
+-->
+<html-include src="partials/header.html" min-height="65px" allow-scripts fade>
+    <!-- Fallback Skeleton while loading -->
+    <div class="skeleton-header">Loading Header...</div>
+</html-include>
+</body>
+</html>
