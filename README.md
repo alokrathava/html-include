@@ -1,107 +1,182 @@
 # `<html-include>`
 
-## Motivation & Architecture
+A lightweight, zero-dependency Web Component for loading reusable HTML partials into a webpage.
 
-### Problem Statement
-In traditional multi-page web development, reusing common UI fragments—such as headers, footers, or navigation bars—presents a recurring maintenance challenge. Without component abstractions, developers are forced to duplicate markup across multiple `.html` files, making site-wide updates tedious and error-prone.
+Use `<html-include>` to reuse headers, footers, navigation bars, sidebars, and other shared HTML fragments without introducing a frontend framework, server-side template engine, or build pipeline.
 
-### Why Avoid Framework Over-Engineering?
-Modern single-page application (SPA) frameworks (e.g., React, Vue) and Static Site Generators (e.g., Next.js, Astro) address component reusability, but often at the cost of unnecessary architectural complexity for lightweight projects:
+---
 
-- **Build Pipeline Overhead:** Introduces Node.js runtime environments, package managers (`npm`), and bundlers (`Vite`, `Webpack`) for projects that only require static file delivery.
-- **Dependency Churn:** Increases security surface area and maintenance requirements across heavy `node_modules` trees.
-- **Client-Side Footprint:** Ships large JavaScript runtime bundles to the client simply to compose static HTML structures.
+## Overview
 
-### The `<html-include>` Solution
-`<html-include>` restores **declarative layout composition** directly to vanilla HTML without build steps, server-side template engines, or heavy framework runtimes.
+Traditional multi-page websites often duplicate common markup across several `.html` files. For example, the same header or footer may appear on every page.
 
-It addresses key technical challenges associated with client-side partial fetching:
+This duplication creates maintenance problems:
 
-- **Layout Stability:** Mitigates Cumulative Layout Shift (CLS) during network fetches via CSS layout reservation (`min-height`) and block-level default display modes.
-- **Request Lifecycle Control:** Employs native `AbortController` pipelines to cancel obsolete network requests when `src` attributes change dynamically, preventing race conditions.
-- **Controlled Script Execution:** Enforces secure default behavior by stripping `<script>` tags, while offering explicit, opt-in execution (`allow-scripts`) for trusted first-party partials.
-- **Platform-Native Execution:** Built strictly on standardized Web APIs (`CustomElements`, `fetch`, and `<template>` fragments) for maximum browser compatibility and zero third-party runtime overhead.
+* Site-wide changes must be repeated across multiple files.
+* Pages can become inconsistent.
+* Small updates are more likely to introduce errors.
+* Lightweight projects may require unnecessary tooling just to reuse HTML.
 
-A small, zero-dependency Web Component for loading reusable HTML partials into a page.
+Modern frameworks and static-site generators solve this problem, but they may introduce more complexity than a small static website needs.
 
-Use it for shared headers, footers, navigation, or other fragments when a full frontend framework or server-side template system would be unnecessary.
+`<html-include>` provides declarative HTML composition using standard browser APIs.
+
+```html
+<html-include src="partials/header.html"></html-include>
+```
+
+The component fetches the specified partial and inserts its markup directly into the element.
+
+---
+
+## Why Use `<html-include>`?
+
+Frameworks such as React and Vue, and static-site generators such as Next.js and Astro, provide component-based development. However, they may be excessive for projects that only need reusable static HTML.
+
+Using these tools can introduce:
+
+* Node.js and package-manager requirements
+* Bundlers such as Vite or Webpack
+* Large dependency trees
+* Additional security and maintenance concerns
+* Client-side JavaScript runtime overhead
+* More complex project configuration and deployment
+
+`<html-include>` avoids this overhead by using platform-native browser features:
+
+* Custom Elements
+* `fetch()`
+* `AbortController`
+* `<template>`
+* `DocumentFragment`
+* `replaceChildren()`
+
+No dependencies, package manager, transpiler, or build process are required.
+
+---
 
 ## Features
 
-- Uses the native Custom Elements API.
-- Has no runtime dependencies or build step.
-- Supports fallback content while the component initializes.
-- Exposes loading, ready, and error states for custom styling.
-- Reloads automatically when `src` changes.
-- Cancels obsolete requests so an older response cannot replace newer content.
-- Removes `<script>` elements by default.
-- Provides optional trusted-script execution and a built-in fade effect.
+* Built with the native Custom Elements API
+* Zero runtime dependencies
+* No build step required
+* Supports fallback content
+* Exposes loading, ready, and error states
+* Automatically reloads when `src` changes
+* Cancels obsolete requests to prevent race conditions
+* Removes `<script>` elements by default
+* Supports explicit trusted-script execution
+* Includes an optional fade transition
+* Supports layout-space reservation to reduce layout shifts
+* Inserts content into the light DOM for normal stylesheet access
 
-## Quick start
+---
 
-Add `html-include.js` to your project, then load it from the document `<head>`:
+## Quick Start
+
+### 1. Add the component script
+
+Copy `html-include.js` into your project and load it from the document `<head>`:
 
 ```html
 <script src="./html-include.js"></script>
 ```
 
-Create an HTML partial. A partial should contain only the markup that will be inserted, not a complete HTML document:
+### 2. Create an HTML partial
+
+A partial should contain only the markup that will be inserted. It should not contain a complete HTML document.
 
 ```html
 <!-- partials/header.html -->
+
 <header class="site-header">
     <a href="/">Home</a>
 </header>
 ```
 
-Reference the partial with `<html-include>`:
+Do not include elements such as:
 
 ```html
-<html-include src="partials/header.html" min-height="65px" fade>
+<!DOCTYPE html>
+<html>
+<head></head>
+<body></body>
+</html>
+```
+
+### 3. Include the partial
+
+```html
+<html-include
+    src="partials/header.html"
+    min-height="65px"
+    fade
+>
     <p>Loading header...</p>
 </html-include>
 ```
 
-The initial children provide fallback content before loading begins and when JavaScript is unavailable. A successful request replaces them with the partial. A failed request replaces them with an accessible error message.
+The initial child content acts as fallback content before loading begins and when JavaScript is unavailable.
 
-## Run the example
+When the request succeeds, the fallback content is replaced by the loaded partial.
 
-HTML partials are fetched by the browser, so serve the project over HTTP instead of opening `index.html` through a `file://` URL.
+When the request fails, the component displays an accessible error message.
 
-For example, from the project directory:
+---
+
+## Running the Example
+
+HTML partials are loaded through `fetch()`. Browsers normally block these requests when a page is opened directly through a `file://` URL.
+
+Serve the project over HTTP instead.
+
+From the project directory, run:
 
 ```bash
 python3 -m http.server 8000
 ```
 
-Then open [http://localhost:8000](http://localhost:8000) in a browser.
+Then open:
+
+```text
+http://localhost:8000
+```
+
+---
 
 ## Attributes
 
-| Attribute | Required | Description |
-| --- | --- | --- |
-| `src` | Yes | URL of the HTML partial. Relative URLs are resolved against the main document URL. Changing the value starts a new request. Removing it cancels pending work without deleting the current content. |
-| `min-height` | No | Any valid CSS `min-height` value, such as `65px` or `4rem`. It reserves layout space when the component connects. |
-| `fade` | No | Boolean attribute that applies the built-in 180 ms opacity transition. The component is transparent while `data-state="loading"`. |
-| `allow-scripts` | No | Boolean attribute that allows recognized JavaScript scripts in a trusted partial to execute. All scripts are removed when this attribute is absent. |
+| Attribute       | Required | Description                                                                                                                                                                                         |
+| --------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src`           | Yes      | URL of the HTML partial. Relative URLs are resolved against the main document URL. Changing the value loads the new partial. Removing it cancels pending work without deleting the current content. |
+| `min-height`    | No       | Sets a CSS `min-height`, such as `65px` or `4rem`, to reserve layout space while the partial is loading.                                                                                            |
+| `fade`          | No       | Enables the built-in 180 ms opacity transition. The component remains transparent while `data-state="loading"`.                                                                                     |
+| `allow-scripts` | No       | Allows recognized JavaScript scripts from a trusted partial to execute. Without this attribute, all `<script>` elements are removed.                                                                |
 
 Boolean attributes are enabled by their presence:
 
 ```html
-<html-include src="trusted-widget.html" allow-scripts></html-include>
+<html-include
+    src="trusted-widget.html"
+    allow-scripts
+></html-include>
 ```
 
-## Loading states
+---
 
-The component exposes its current status through `data-state`:
+## Loading States
 
-| State | Meaning |
-| --- | --- |
-| `loading` | The partial is being fetched and processed. |
-| `ready` | The markup has been inserted and allowed scripts have been scheduled. External scripts may still be loading. |
-| `error` | The request or rendering operation failed. An element with `role="alert"` is displayed and the underlying error is logged to the console. |
+The component exposes its current status through the `data-state` attribute.
 
-The attribute is absent when the component has no `src`. These states can be styled directly:
+| State     | Meaning                                                                                                                               |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `loading` | The partial is being fetched and processed.                                                                                           |
+| `ready`   | The markup has been inserted and allowed scripts have been scheduled. External scripts may still be loading.                          |
+| `error`   | The request or rendering process failed. An accessible error message is displayed, and the underlying error is logged to the console. |
+
+The `data-state` attribute is absent when the component does not have a `src` value.
+
+States can be styled using standard CSS:
 
 ```css
 html-include[data-state="loading"] {
@@ -113,18 +188,51 @@ html-include[data-state="error"] {
 }
 ```
 
-## Changing or refreshing a partial
+---
 
-Changing `src` on a connected element automatically loads the new partial:
+## Layout Stability
+
+Fetching a partial takes time. Without reserved space, content below the component may move when the partial is inserted, contributing to Cumulative Layout Shift.
+
+Use the `min-height` attribute to reserve an appropriate amount of space:
+
+```html
+<html-include
+    src="partials/header.html"
+    min-height="65px"
+></html-include>
+```
+
+The component also uses `display: block` by default, making its layout behavior more predictable.
+
+---
+
+## Changing a Partial
+
+Changing the `src` attribute on a connected component automatically starts a new request.
 
 ```js
 const include = document.querySelector('html-include');
-include.setAttribute('src', 'partials/footer.html');
+
+include.setAttribute(
+    'src',
+    'partials/footer.html'
+);
 ```
 
-Call the public `load()` method to retry or refresh the current URL without changing `src`:
+If another request is already active, it is cancelled before the new request begins.
+
+This prevents an older response from replacing newer content.
+
+---
+
+## Refreshing a Partial
+
+Call the public `load()` method to retry or refresh the current partial without changing the `src` attribute.
 
 ```js
+const include = document.querySelector('html-include');
+
 await include.load();
 
 if (include.dataset.state === 'error') {
@@ -132,57 +240,426 @@ if (include.dataset.state === 'error') {
 }
 ```
 
-Expected loading failures are handled inside the component and reflected through `data-state`. Calling `load()` again cancels any request that is still active.
+Calling `load()` while another request is active cancels the existing request before starting a new one.
 
-## Styles and DOM behavior
+Expected loading failures are handled internally and reflected through `data-state`.
 
-Loaded content is inserted into the component's light DOM rather than a Shadow DOM. This means:
+---
 
-- Styles in the main document can target the included markup.
-- `<style>` elements inside a partial apply to the main document.
-- IDs and class names share the same namespace as the rest of the page.
-- Relative URLs inside the included markup resolve against the main document, not the partial's location.
+## Request Lifecycle
 
-The component injects only these base rules:
+The component uses `AbortController` to manage fetch requests.
+
+When any of the following occurs, obsolete work is cancelled:
+
+* The `src` attribute changes
+* The `src` attribute is removed
+* `load()` is called again
+* A newer request replaces an older request
+
+This prevents race conditions where a slower, outdated response could overwrite the result of a newer request.
+
+---
+
+## DOM and Styling Behavior
+
+Loaded content is inserted into the component's light DOM rather than a Shadow DOM.
+
+This means:
+
+* Styles from the main document can target included elements.
+* `<style>` elements inside a partial affect the main document.
+* IDs and class names share the same namespace as the rest of the page.
+* JavaScript can query included elements normally.
+* Global CSS rules may affect the loaded markup.
+
+For example:
 
 ```css
-html-include { display: block; }
-html-include[fade] { opacity: 0; transition: opacity 180ms ease-out; }
-html-include[fade]:not([data-state="loading"]) { opacity: 1; }
+.site-header {
+    display: flex;
+    align-items: center;
+    min-height: 65px;
+}
 ```
 
-## Script handling
+This stylesheet can target `.site-header` even when the element was loaded from a partial.
 
-Scripts are disabled by default. Without `allow-scripts`, every `<script>` element is removed before the partial is inserted.
+---
 
-When `allow-scripts` is present, scripts with no `type`, `type="module"`, `type="text/javascript"`, or `type="application/javascript"` are recreated so the browser executes them. Non-executable script types, such as JSON data blocks, remain in the DOM without being executed.
+## Relative URLs
 
-`data-state="ready"` means scripts have been scheduled; it does not guarantee that external scripts have finished downloading or running.
+Relative URLs inside an included partial are resolved against the main document URL, not the partial file's location.
+
+Given the following structure:
+
+```text
+index.html
+partials/
+    header.html
+images/
+    logo.svg
+```
+
+This markup inside `partials/header.html`:
+
+```html
+<img src="images/logo.svg" alt="Logo">
+```
+
+is resolved relative to `index.html`.
+
+It is not automatically resolved relative to `partials/header.html`.
+
+Account for this behavior when referencing:
+
+* Images
+* Stylesheets
+* Links
+* Scripts
+* Fonts
+* Other embedded resources
+
+---
+
+## Built-In Styles
+
+The component injects only the following base rules:
+
+```css
+html-include {
+    display: block;
+}
+
+html-include[fade] {
+    opacity: 0;
+    transition: opacity 180ms ease-out;
+}
+
+html-include[fade]:not([data-state="loading"]) {
+    opacity: 1;
+}
+```
+
+The `fade` attribute is optional.
+
+Example:
+
+```html
+<html-include
+    src="partials/navigation.html"
+    fade
+></html-include>
+```
+
+---
+
+## Script Handling
+
+Scripts are disabled by default.
+
+When `allow-scripts` is absent, every `<script>` element is removed before the partial is inserted.
+
+```html
+<html-include src="partials/header.html"></html-include>
+```
+
+This behavior prevents JavaScript in the partial from executing, but it does not fully sanitize the HTML.
+
+### Enabling scripts
+
+For trusted first-party partials, add the `allow-scripts` attribute:
+
+```html
+<html-include
+    src="partials/trusted-widget.html"
+    allow-scripts
+></html-include>
+```
+
+When enabled, recognized executable scripts are recreated so the browser can execute them.
+
+Supported executable script types include:
+
+* No `type` attribute
+* `type="module"`
+* `type="text/javascript"`
+* `type="application/javascript"`
+
+Example:
+
+```html
+<script>
+    console.log('Partial loaded');
+</script>
+```
+
+Module scripts are also supported:
+
+```html
+<script type="module">
+    console.log('Module partial loaded');
+</script>
+```
+
+Non-executable script types remain in the DOM without being executed.
+
+For example:
+
+```html
+<script type="application/json">
+{
+    "name": "Example"
+}
+</script>
+```
+
+### Script readiness
+
+When the component enters the `ready` state, allowed scripts have been inserted and scheduled.
+
+This does not guarantee that external scripts have finished downloading or executing.
+
+---
 
 ## Security
 
-Only load HTML from sources you trust.
+Only load HTML from trusted sources.
 
-Removing `<script>` elements is not HTML sanitization. Included markup may still contain inline event handlers, iframes, embedded resources, dangerous URLs, or other active content. The `allow-scripts` attribute increases that risk and should never be enabled for user-provided or otherwise untrusted HTML.
+Removing `<script>` elements is not equivalent to sanitizing HTML.
 
-Normal browser fetch and CORS rules apply to cross-origin partials.
+A partial may still contain active or potentially dangerous content, including:
 
-## Browser support
+* Inline event handlers such as `onclick`
+* `<iframe>` elements
+* Embedded external resources
+* Dangerous URL schemes
+* Malicious forms
+* Tracking content
+* Styles that modify the surrounding page
+* Other active HTML elements
 
-The component targets modern browsers with support for:
+The `allow-scripts` attribute increases the security risk and must not be enabled for:
 
-- Custom Elements
-- `fetch()` and `AbortController`
-- `<template>` and `DocumentFragment`
-- `Element.replaceChildren()`
+* User-generated content
+* Third-party HTML
+* Unverified remote content
+* Data received from untrusted APIs
+
+Normal browser security rules still apply, including:
+
+* Same-origin policy
+* Cross-Origin Resource Sharing
+* Content Security Policy
+* Mixed-content restrictions
+
+---
+
+## Error Handling
+
+When a request or rendering operation fails, the component:
+
+1. Sets `data-state="error"`.
+2. Displays an accessible error message.
+3. Adds `role="alert"` to the error message.
+4. Logs the underlying error to the browser console.
+
+Error-state styling can be customized:
+
+```css
+html-include[data-state="error"] {
+    padding: 1rem;
+    border: 1px solid #f87171;
+    background: #fef2f2;
+}
+```
+
+To retry the request:
+
+```js
+const include = document.querySelector('html-include');
+
+await include.load();
+```
+
+---
+
+## Fallback Content
+
+Content placed inside `<html-include>` before the partial loads acts as fallback content.
+
+```html
+<html-include src="partials/sidebar.html">
+    <nav aria-label="Temporary navigation">
+        <p>Loading navigation...</p>
+    </nav>
+</html-include>
+```
+
+Fallback content is useful for:
+
+* Loading messages
+* Skeleton placeholders
+* Basic no-JavaScript navigation
+* Reserved layout structures
+* Progressive enhancement
+
+After a successful request, the fallback content is replaced by the loaded partial.
+
+---
+
+## Browser Support
+
+The component targets modern browsers that support:
+
+* Custom Elements
+* `fetch()`
+* `AbortController`
+* `<template>`
+* `DocumentFragment`
+* `Element.replaceChildren()`
 
 No legacy-browser polyfills are included.
 
-## Project files
+---
+
+## Project Structure
 
 ```text
-html-include.js       Component implementation
-index.html            Basic working example
-partials/header.html  Example HTML partial
-style.css             Optional project stylesheet
+html-include.js
+index.html
+style.css
+partials/
+    header.html
 ```
+
+### Files
+
+| File                   | Description                   |
+| ---------------------- | ----------------------------- |
+| `html-include.js`      | Web Component implementation  |
+| `index.html`           | Basic usage example           |
+| `partials/header.html` | Example reusable HTML partial |
+| `style.css`            | Optional project stylesheet   |
+
+---
+
+## Example
+
+### `index.html`
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>HTML Include Example</title>
+
+    <link rel="stylesheet" href="./style.css">
+    <script src="./html-include.js"></script>
+</head>
+
+<body>
+    <html-include
+        src="partials/header.html"
+        min-height="65px"
+        fade
+    >
+        <p>Loading header...</p>
+    </html-include>
+
+    <main>
+        <h1>Welcome</h1>
+        <p>This page uses a reusable HTML partial.</p>
+    </main>
+</body>
+</html>
+```
+
+### `partials/header.html`
+
+```html
+<header class="site-header">
+    <a href="/">Home</a>
+
+    <nav aria-label="Main navigation">
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+    </nav>
+</header>
+```
+
+### `style.css`
+
+```css
+body {
+    margin: 0;
+    font-family: system-ui, sans-serif;
+}
+
+.site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 65px;
+    padding-inline: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+html-include[data-state="loading"] {
+    pointer-events: none;
+}
+
+html-include[data-state="error"] {
+    padding: 1rem;
+    border: 1px solid #f87171;
+}
+```
+
+---
+
+## Recommended Use Cases
+
+`<html-include>` works well for:
+
+* Small static websites
+* Documentation websites
+* Prototypes
+* Internal tools
+* Marketing pages
+* Multi-page sites with shared navigation
+* Projects that do not require a full component framework
+
+It may not be appropriate when the application requires:
+
+* Complex reactive state
+* Server-side rendering
+* Advanced routing
+* Large-scale component composition
+* Strong style encapsulation
+* Extensive client-side interactivity
+* HTML from untrusted sources
+
+---
+
+## Summary
+
+`<html-include>` provides a simple way to reuse HTML fragments while keeping a project close to the browser platform.
+
+It offers:
+
+* Declarative HTML partial loading
+* No framework or build tooling
+* Stable request lifecycle handling
+* Automatic reloading
+* Loading and error states
+* Optional fade transitions
+* Safer default script handling
+* Light-DOM styling compatibility
+
+For lightweight websites that need reusable HTML without adopting an entire frontend architecture, `<html-include>` provides a focused, platform-native solution.
