@@ -13,11 +13,12 @@
   HTML INCLUDE HEADER SLOT
   - src: path to the partial
   - min-height: reserves vertical space to prevent layout shift (CLS)
-  - allow-scripts: allows the script inside header.html to run
   - fade: smooth fade-in transition on load
+  - allow-scripts is intentionally omitted because this partial has no scripts;
+    only enable it for trusted partials that need JavaScript execution
 -->
-<html-include src="partials/header.html" min-height="65px" allow-scripts fade>
-    <!-- Fallback Skeleton while loading -->
+<html-include src="partials/header.html" min-height="65px" fade>
+    <!-- Initial fallback content, also shown if JavaScript is unavailable -->
     <div class="skeleton-header">Loading Header...</div>
 </html-include>
 </body>
