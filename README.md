@@ -29,6 +29,29 @@ The component fetches the specified partial and inserts its markup directly into
 
 ---
 
+## HTML Standard Proposal
+
+On August 2, 2026, this project was submitted to the WHATWG HTML issue
+tracker as [Proposal: Native Declarative HTML Partial Inclusions
+(`<include>` / `<html-include>`)](https://github.com/whatwg/html/issues/12747).
+The repository serves as a reference implementation for exploring the proposed
+API and its edge cases.
+
+Current status as of August 2, 2026:
+
+* The issue is **open** and labeled `addition/proposal`.
+* It is also labeled `needs implementer interest`, so progress currently
+  depends on interest from browser implementers.
+* No discussion comments, standards decision, assignee, or milestone have been
+  recorded yet.
+
+Opening the issue starts a standards discussion; it does not mean the feature
+has been accepted into the HTML Standard. The `<html-include>` element in this
+repository remains a userland Web Component and still requires
+`html-include.js`. Follow the linked issue for the latest status and discussion.
+
+---
+
 ## Why Use `<html-include>`?
 
 Frameworks such as React and Vue, and static-site generators such as Next.js and Astro, provide component-based development. However, they may be excessive for projects that only need reusable static HTML.
