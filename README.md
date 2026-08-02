@@ -1,5 +1,27 @@
 # `<html-include>`
 
+## Motivation & Architecture
+
+### Problem Statement
+In traditional multi-page web development, reusing common UI fragments—such as headers, footers, or navigation bars—presents a recurring maintenance challenge. Without component abstractions, developers are forced to duplicate markup across multiple `.html` files, making site-wide updates tedious and error-prone.
+
+### Why Avoid Framework Over-Engineering?
+Modern single-page application (SPA) frameworks (e.g., React, Vue) and Static Site Generators (e.g., Next.js, Astro) address component reusability, but often at the cost of unnecessary architectural complexity for lightweight projects:
+
+- **Build Pipeline Overhead:** Introduces Node.js runtime environments, package managers (`npm`), and bundlers (`Vite`, `Webpack`) for projects that only require static file delivery.
+- **Dependency Churn:** Increases security surface area and maintenance requirements across heavy `node_modules` trees.
+- **Client-Side Footprint:** Ships large JavaScript runtime bundles to the client simply to compose static HTML structures.
+
+### The `<html-include>` Solution
+`<html-include>` restores **declarative layout composition** directly to vanilla HTML without build steps, server-side template engines, or heavy framework runtimes.
+
+It addresses key technical challenges associated with client-side partial fetching:
+
+- **Layout Stability:** Mitigates Cumulative Layout Shift (CLS) during network fetches via CSS layout reservation (`min-height`) and block-level default display modes.
+- **Request Lifecycle Control:** Employs native `AbortController` pipelines to cancel obsolete network requests when `src` attributes change dynamically, preventing race conditions.
+- **Controlled Script Execution:** Enforces secure default behavior by stripping `<script>` tags, while offering explicit, opt-in execution (`allow-scripts`) for trusted first-party partials.
+- **Platform-Native Execution:** Built strictly on standardized Web APIs (`CustomElements`, `fetch`, and `<template>` fragments) for maximum browser compatibility and zero third-party runtime overhead.
+
 A small, zero-dependency Web Component for loading reusable HTML partials into a page.
 
 Use it for shared headers, footers, navigation, or other fragments when a full frontend framework or server-side template system would be unnecessary.
