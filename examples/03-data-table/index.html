@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>03 — Data Table</title>
+    <script src="html-include.js"></script>
+    <style>
+        body { font-family: system-ui, sans-serif; padding: 2rem; }
+        table { border-collapse: collapse; width: 100%; max-width: 32rem; }
+        th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e2e8f0; }
+        th { background: #f1f5f9; }
+    </style>
+</head>
+<body>
+
+<h1>Data Table</h1>
+<p>
+    A raw <code>&lt;html-include&gt;</code> element cannot go inside a
+    <code>&lt;table&gt;</code> outside of a cell: the HTML parser doesn't
+    recognize it as valid table content and "foster-parents" it out — it
+    gets moved to just <em>before</em> the table, and any rows it would have
+    inserted end up as siblings of the table instead of inside
+    <code>&lt;tbody&gt;</code>.
+</p>
+<p>
+    The fix here is attribute-based hydration: put <code>data-include</code>
+    directly on the real <code>&lt;tbody&gt;</code> and let a small script
+    fetch and inject into it. No foster parenting, because no custom element
+    is ever placed inside the table.
+</p>
+
+<table>
+    <thead>
+        <tr><th>#</th><th>Item</th><th>Qty</th><th>Price</th></tr>
+    </thead>
+    <!--
+      SCENARIO: data-include hydration instead of <html-include>, so the
+      parser never has to place an unknown element inside <table>.
+      The fallback row below is real table markup, so it displays correctly
+      even before the script runs.
+    -->
+    <tbody data-include="partials/table-rows.html">
+        <tr><td colspan="4">Loading rows…</td></tr>
+    </tbody>
+</table>
+
+<script>
+    // ponytail: this is a page-level snippet, not part of html-include.js —
+    // no allow-scripts support, no request cancellation, no reload when
+    // data-include changes. See README.md ("Tables and other restricted
+    // parents") for the tradeoffs. Promote it into the library only if a
+    // second page needs this exact pattern.
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('[data-include]').forEach(el => {
+            fetch(el.dataset.include)
+                .then(response => response.ok
+                    ? response.text()
+                    : Promise.reject(new Error(`HTTP ${response.status}`)))
+                .then(html => {
+                    const template = document.createElement('template');
+                    template.innerHTML = html;
+                    template.content.querySelectorAll('script').forEach(s => s.remove());
+                    el.replaceChildren(template.content);
+                    el.dataset.state = 'ready';
+                })
+                .catch(error => {
+                    el.dataset.state = 'error';
+                    console.error(`Failed to load "${el.dataset.include}".`, error);
+                });
+        });
+    });
+</script>
+
+</body>
+</html>

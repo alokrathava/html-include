@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>06 — Assets and Data</title>
+    <script src="html-include.js"></script>
+    <style>
+        body { font-family: system-ui, sans-serif; padding: 2rem; max-width: 32rem; }
+    </style>
+</head>
+<body>
+
+<h1>Assets and Data</h1>
+<p>
+    <code>partials/promo-card.html</code> lives in a different directory
+    than this page, but its <code>&lt;img&gt;</code> uses a plain relative
+    path (<code>assets/logo.svg</code>). That path resolves against
+    <strong>this document's URL</strong>, not against the partial's file
+    location — so it works because <code>assets/</code> sits next to
+    <code>index.html</code>, not next to the partial.
+</p>
+<p>
+    The partial also embeds a <code>&lt;script type="application/json"&gt;</code>
+    data block alongside a normal executable <code>&lt;script&gt;</code>.
+    With <code>allow-scripts</code>, only the executable one is recreated
+    and run; the JSON block is left in the DOM untouched and just read as data.
+</p>
+
+<!-- SCENARIO: relative-URL resolution + mixed script types in one partial. -->
+<html-include src="partials/promo-card.html" allow-scripts>
+    <p>Loading promo…</p>
+</html-include>
+
+</body>
+</html>

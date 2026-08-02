@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>05 — Error and Retry</title>
+    <script src="html-include.js"></script>
+    <style>
+        body { font-family: system-ui, sans-serif; padding: 2rem; max-width: 32rem; }
+        button { padding: 0.4rem 0.9rem; margin-right: 0.5rem; }
+        /* Override the component's default inline error styling. */
+        html-include[data-state="error"] {
+            padding: 1rem;
+            border: 1px solid #f87171;
+            background: #fef2f2;
+            border-radius: 0.375rem;
+        }
+        #status { margin-top: 1rem; font-family: ui-monospace, monospace; }
+    </style>
+</head>
+<body>
+
+<h1>Error and Retry</h1>
+<p>
+    <code>src</code> below points at a partial that doesn't exist, so the
+    fetch will 404 on load. Failures never throw out of the component —
+    they're surfaced as <code>data-state="error"</code> with an accessible
+    <code>role="alert"</code> message, and logged to the console.
+</p>
+
+<!--
+  SCENARIO: the error state and the public load() method.
+  does-not-exist.html deliberately 404s so data-state starts as "error".
+-->
+<html-include id="broken" src="partials/does-not-exist.html">
+    <p>Loading…</p>
+</html-include>
+
+<p>
+    <button type="button" id="retry">Retry same (still fails)</button>
+    <button type="button" id="recover">Switch to a partial that exists</button>
+</p>
+<p id="status"></p>
+
+<script>
+    const broken = document.getElementById('broken');
+    const status = document.getElementById('status');
+
+    document.getElementById('retry').addEventListener('click', async () => {
+        // load() re-runs the same request without touching src. It resolves
+        // whether the fetch succeeds or fails — check dataset.state after.
+        await broken.load();
+        status.textContent = `After retry, data-state="${broken.dataset.state}"`;
+    });
+
+    document.getElementById('recover').addEventListener('click', () => {
+        // Changing src to a partial that actually exists reloads and clears
+        // the error once the new fetch succeeds.
+        broken.setAttribute('src', 'partials/recovered.html');
+        status.textContent = 'Switched src to partials/recovered.html';
+    });
+</script>
+
+</body>
+</html>

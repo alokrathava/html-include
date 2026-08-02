@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>01 — Basic Layout — About</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="html-include.js"></script>
+</head>
+<body>
+
+<!-- Same partials as index.html, reused as-is. -->
+<html-include src="partials/header.html" min-height="54px" fade>
+    <div class="skeleton">Loading header…</div>
+</html-include>
+
+<main>
+    <h1>About</h1>
+    <p>
+        This is a second page sharing the same header and footer partials as
+        <a href="index.html">index.html</a>, demonstrating multi-page reuse
+        with zero build step.
+    </p>
+</main>
+
+<html-include src="partials/footer.html" min-height="70px" fade>
+    <div class="skeleton">Loading footer…</div>
+</html-include>
+
+</body>
+</html>

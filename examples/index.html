@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>&lt;html-include&gt; Examples</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 2rem auto; padding: 0 1.5rem; color: #1e293b; }
+        table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+        th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+        th { background: #f1f5f9; }
+        code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 0.25rem; }
+        a.back { display: inline-block; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+
+<a class="back" href="../index.html">&larr; Back to root demo</a>
+<h1>&lt;html-include&gt; Examples</h1>
+<p>Six standalone sample projects. Each has its own <code>html-include.js</code> copy and runs with <code>python3 -m http.server 8000</code> from inside its folder.</p>
+
+<table>
+    <thead>
+        <tr><th>Example</th><th>Demonstrates</th></tr>
+    </thead>
+    <tbody>
+        <tr><td><a href="01-basic-layout/index.html">01 — basic-layout</a></td><td>Sharing a header/footer across static pages (<code>min-height</code>, <code>fade</code>, fallback content)</td></tr>
+        <tr><td><a href="02-interactive-widget/index.html">02 — interactive-widget</a></td><td>A partial with an embedded <code>&lt;script&gt;</code> (<code>allow-scripts</code>)</td></tr>
+        <tr><td><a href="03-data-table/index.html">03 — data-table</a></td><td>Hydrating a <code>&lt;tbody&gt;</code> with <code>data-include</code> to avoid foster-parenting</td></tr>
+        <tr><td><a href="04-dynamic-tabs/index.html">04 — dynamic-tabs</a></td><td>Switching <code>src</code> at runtime and the request-race guard</td></tr>
+        <tr><td><a href="05-error-retry/index.html">05 — error-retry</a></td><td>The <code>error</code> state and the public <code>load()</code> method</td></tr>
+        <tr><td><a href="06-assets-and-data/index.html">06 — assets-and-data</a></td><td>Relative-URL resolution and mixed <code>&lt;script&gt;</code> types</td></tr>
+    </tbody>
+</table>
+
+</body>
+</html>

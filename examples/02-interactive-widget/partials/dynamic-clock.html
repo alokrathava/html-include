@@ -1,0 +1,24 @@
+<style>
+    .clock {
+        display: inline-block;
+        padding: 1rem 1.5rem;
+        border-radius: 0.5rem;
+        background: #0f172a;
+        color: #38bdf8;
+        font: 700 1.5rem/1 ui-monospace, monospace;
+    }
+</style>
+
+<div class="clock"><span class="clock-time">--:--:--</span></div>
+
+<script>
+    // Scoped to the <script> element's own parent so this partial behaves
+    // correctly no matter how many times it's included on one page (see
+    // index.html, which includes it twice).
+    (() => {
+        const clockEl = document.currentScript.previousElementSibling.querySelector('.clock-time');
+        const tick = () => { clockEl.textContent = new Date().toLocaleTimeString(); };
+        tick();
+        setInterval(tick, 1000);
+    })();
+</script>

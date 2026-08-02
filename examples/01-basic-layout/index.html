@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>01 — Basic Layout</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Load html-include.js in <head> so the element is registered before
+         the parser reaches any <html-include> tag below. -->
+    <script src="html-include.js"></script>
+</head>
+<body>
+
+<!--
+  SCENARIO: sharing a header/footer partial across multiple static pages.
+
+  - min-height="54px" reserves the header's final height up front, so the
+    page below it doesn't jump down once the fetch resolves (avoids CLS).
+  - fade cross-fades the skeleton into the real content instead of a hard cut.
+  - The element's own children (.skeleton) are fallback content: shown
+    immediately, and also what a no-JS visitor would see permanently.
+-->
+<html-include src="partials/header.html" min-height="54px" fade>
+    <div class="skeleton">Loading header…</div>
+</html-include>
+
+<main>
+    <h1>Basic Layout</h1>
+    <p>
+        This page and <a href="about.html">about.html</a> both include the
+        same <code>partials/header.html</code> and
+        <code>partials/footer.html</code>. Edit either partial once and both
+        pages update — no duplication.
+    </p>
+</main>
+
+<html-include src="partials/footer.html" min-height="70px" fade>
+    <div class="skeleton">Loading footer…</div>
+</html-include>
+
+</body>
+</html>

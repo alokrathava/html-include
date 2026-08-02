@@ -1,0 +1,6 @@
+<!-- Bare <tr> rows, no <table>/<tbody> wrapper: the parent <tbody> already
+     provides that structure. template.innerHTML parses these rows correctly
+     even though a plain div.innerHTML would foster-parent them. -->
+<tr><td>1</td><td>Widget A</td><td>42</td><td>$12.00</td></tr>
+<tr><td>2</td><td>Widget B</td><td>7</td><td>$29.50</td></tr>
+<tr><td>3</td><td>Widget C</td><td>103</td><td>$4.75</td></tr>

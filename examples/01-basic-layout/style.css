@@ -1,0 +1,61 @@
+body {
+    margin: 0;
+    font-family: system-ui, sans-serif;
+    color: #1e293b;
+}
+
+.site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 54px;
+    padding-inline: 1.5rem;
+    background: #0f172a;
+    color: #f8fafc;
+}
+
+.site-header .brand {
+    color: #38bdf8;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.site-header nav a {
+    color: #cbd5e1;
+    text-decoration: none;
+    margin-left: 1.25rem;
+}
+
+.site-header nav a:hover {
+    color: #38bdf8;
+}
+
+.site-footer {
+    margin-top: 3rem;
+    padding: 1.5rem;
+    text-align: center;
+    color: #64748b;
+    border-top: 1px solid #e2e8f0;
+}
+
+main {
+    padding: 2rem 1.5rem;
+    max-width: 40rem;
+}
+
+/* Skeleton placeholders shown as fallback content while the real
+   header/footer are still being fetched. */
+.skeleton {
+    display: flex;
+    align-items: center;
+    min-height: 54px;
+    padding-inline: 1.5rem;
+    background: #e2e8f0;
+    color: #94a3b8;
+}
+
+html-include[data-state="error"] {
+    padding: 1rem;
+    border: 1px solid #f87171;
+    background: #fef2f2;
+}

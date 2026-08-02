@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>02 — Interactive Widget</title>
+    <script src="html-include.js"></script>
+    <style>
+        body { font-family: system-ui, sans-serif; padding: 2rem; }
+        .row { display: flex; gap: 2rem; margin-top: 1.5rem; }
+        .col { text-align: center; }
+        .col h2 { font-size: 1rem; color: #475569; }
+    </style>
+</head>
+<body>
+
+<h1>Interactive Widget</h1>
+<p>
+    <code>partials/dynamic-clock.html</code> contains a live-updating
+    <code>&lt;script&gt;</code>. By default <code>&lt;html-include&gt;</code>
+    strips all <code>&lt;script&gt;</code> elements from a partial before
+    inserting it — that's the safe default for untrusted markup. Adding
+    <code>allow-scripts</code> tells the component this partial is trusted
+    and its scripts should actually run.
+</p>
+
+<div class="row">
+    <div class="col">
+        <h2>allow-scripts present → clock runs</h2>
+        <!--
+          SCENARIO: allow-scripts recreates the <script> so the browser
+          executes it. Only do this for partials you trust — it's
+          equivalent to running arbitrary JS from that URL.
+        -->
+        <html-include src="partials/dynamic-clock.html" allow-scripts>
+            <p>Loading clock…</p>
+        </html-include>
+    </div>
+
+    <div class="col">
+        <h2>allow-scripts omitted → clock frozen</h2>
+        <!-- Same partial, no allow-scripts: markup renders, but the
+             <script> is removed before insertion, so the time never ticks. -->
+        <html-include src="partials/dynamic-clock.html">
+            <p>Loading clock…</p>
+        </html-include>
+    </div>
+</div>
+
+</body>
+</html>

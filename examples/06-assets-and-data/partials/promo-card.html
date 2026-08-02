@@ -1,0 +1,37 @@
+<style>
+    .promo { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #f1f5f9; border-radius: 0.5rem; }
+</style>
+
+<div class="promo">
+    <!--
+      This path is resolved relative to the DOCUMENT (index.html), not to
+      this partial's own location (partials/promo-card.html). Since
+      assets/logo.svg sits next to index.html, this plain relative path
+      works even though the partial itself lives one directory away.
+    -->
+    <img src="assets/logo.svg" alt="Logo" width="48" height="48">
+    <div>
+        <strong id="promo-title">Loading…</strong>
+        <p id="promo-body"></p>
+    </div>
+</div>
+
+<!--
+  Non-executable script type: html-include leaves this untouched in the DOM
+  (with allow-scripts) because "application/json" isn't a recognized
+  executable type. It's just a data island for the script below to read.
+-->
+<script type="application/json" id="promo-config">
+{ "title": "Spring Sale", "body": "20% off all plans through the end of the month." }
+</script>
+
+<script>
+    // Executable type ("" / no type attr) — this one IS recreated and run
+    // when allow-scripts is set.
+    (() => {
+        const container = document.currentScript.parentElement;
+        const config = JSON.parse(container.querySelector('#promo-config').textContent);
+        container.querySelector('#promo-title').textContent = config.title;
+        container.querySelector('#promo-body').textContent = config.body;
+    })();
+</script>

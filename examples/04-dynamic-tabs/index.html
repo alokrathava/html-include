@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>04 — Dynamic Tabs</title>
+    <script src="html-include.js"></script>
+    <style>
+        body { font-family: system-ui, sans-serif; padding: 2rem; max-width: 32rem; }
+        .tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+        .tabs button { padding: 0.5rem 1rem; border: 1px solid #cbd5e1; background: #f8fafc; cursor: pointer; }
+        .tabs button[aria-selected="true"] { background: #0f172a; color: white; }
+        #panel { border: 1px solid #e2e8f0; padding: 1rem; }
+        /* Visible feedback while a new tab's partial is loading. */
+        #panel[data-state="loading"] { opacity: 0.5; pointer-events: none; }
+        #race-result { margin-top: 1rem; font-family: ui-monospace, monospace; }
+    </style>
+</head>
+<body>
+
+<h1>Dynamic Tabs</h1>
+<p>
+    Changing <code>src</code> on a connected <code>&lt;html-include&gt;</code>
+    reloads it automatically — no need to remove/re-add the element.
+</p>
+
+<!--
+  SCENARIO: runtime src switching. Each tab button sets #panel's src
+  attribute; attributeChangedCallback in html-include.js picks up the
+  change and fetches the new partial. min-height keeps the tab bar from
+  jumping while the panel is empty/loading.
+-->
+<div class="tabs" role="tablist">
+    <button type="button" data-src="partials/tab-overview.html" aria-selected="true">Overview</button>
+    <button type="button" data-src="partials/tab-pricing.html" aria-selected="false">Pricing</button>
+    <button type="button" data-src="partials/tab-changelog.html" aria-selected="false">Changelog</button>
+</div>
+
+<html-include id="panel" src="partials/tab-overview.html" min-height="220px" fade>
+    <p>Loading…</p>
+</html-include>
+
+<p>
+    <button type="button" id="race-all">Load all three fast (race test)</button>
+</p>
+<p id="race-result"></p>
+
+<script>
+    const panel = document.getElementById('panel');
+    const buttons = document.querySelectorAll('.tabs button');
+
+    buttons.forEach(button => {
+        button.addEventListener('click', () => {
+            buttons.forEach(b => b.setAttribute('aria-selected', String(b === button)));
+            // Setting src on an already-connected element triggers a reload;
+            // any in-flight request for the previous src is aborted first.
+            panel.setAttribute('src', button.dataset.src);
+        });
+    });
+
+    document.getElementById('race-all').addEventListener('click', async () => {
+        // Fire three src changes back-to-back. Each new load() call aborts
+        // the previous one, so only the last partial should ever render —
+        // this is the AbortController race guard described in the README.
+        panel.setAttribute('src', 'partials/tab-overview.html');
+        panel.setAttribute('src', 'partials/tab-pricing.html');
+        panel.setAttribute('src', 'partials/tab-changelog.html');
+
+        // Wait for the final load to settle, then report what actually won.
+        await new Promise(resolve => setTimeout(resolve, 300));
+        document.getElementById('race-result').textContent =
+            `Panel settled on: ${panel.getAttribute('src')} (state: ${panel.dataset.state})`;
+    });
+</script>
+
+</body>
+</html>

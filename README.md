@@ -164,6 +164,53 @@ Boolean attributes are enabled by their presence:
 
 ---
 
+## Tables and Other Restricted Parents
+
+`<html-include>` is a custom element, and the HTML parser only allows specific
+element types as direct children of `<table>` (`<thead>`, `<tbody>`, `<tr>`,
+etc.). A `<html-include>` written directly inside a `<table>` is not valid
+table content, so the parser "foster-parents" it: the element (and anything
+it would render) is moved to just *before* the table instead of inside it.
+
+For this case, include a small hydration script instead of the custom
+element, and hydrate an existing `<tbody>` (or other table section) in place:
+
+```html
+<table>
+    <tbody data-include="partials/table-rows.html">
+        <tr><td colspan="4">Loading…</td></tr>
+    </tbody>
+</table>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('[data-include]').forEach(el => {
+            fetch(el.dataset.include)
+                .then(r => r.ok ? r.text() : Promise.reject(new Error(`HTTP ${r.status}`)))
+                .then(html => {
+                    const t = document.createElement('template');
+                    t.innerHTML = html;
+                    t.content.querySelectorAll('script').forEach(s => s.remove());
+                    el.replaceChildren(t.content);
+                    el.dataset.state = 'ready';
+                })
+                .catch(error => {
+                    el.dataset.state = 'error';
+                    console.error(`Failed to load "${el.dataset.include}".`, error);
+                });
+        });
+    });
+</script>
+```
+
+This `data-include` pattern is a page-level snippet, not part of
+`html-include.js`. It intentionally has less behavior than the component:
+no `allow-scripts` support, no request cancellation, and it does not reload
+when the attribute changes later. See
+[`examples/03-data-table/`](examples/03-data-table) for a full working copy.
+
+---
+
 ## Loading States
 
 The component exposes its current status through the `data-state` attribute.
@@ -541,6 +588,10 @@ partials/
 | `index.html`           | Basic usage example           |
 | `partials/header.html` | Example reusable HTML partial |
 | `style.css`            | Optional project stylesheet   |
+
+See [`examples/`](examples) for six standalone sample projects covering
+layout sharing, scripts, tables, dynamic `src` switching, error handling,
+and asset/data-script resolution.
 
 ---
 
